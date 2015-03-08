@@ -1,0 +1,38 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+
+repositories {
+  jcenter()
+}
+
+android {
+  compileSdkVersion 21
+  buildToolsVersion "21.1.2"
+
+  defaultConfig {
+    minSdkVersion 15
+    targetSdkVersion 21
+    versionCode 1
+    versionName "1.0"
+
+    testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+  }
+
+  sourceSets {
+    main.java.srcDirs += 'src/main/kotlin'
+    androidTest.java.srcDirs += 'src/androidTest/kotlin'
+    test.java.srcDirs += 'src/test/kotlin'
+  }
+
+  packagingOptions {
+    exclude 'LICENSE.txt'
+  }
+}
+
+dependencies {
+  compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+  compile 'com.android.support:support-v13:21.0.3'
+
+  androidTestCompile "com.android.support.test:testing-support-lib:0.1"
+  androidTestCompile "com.squareup.assertj:assertj-android:1.0.0"
+}
