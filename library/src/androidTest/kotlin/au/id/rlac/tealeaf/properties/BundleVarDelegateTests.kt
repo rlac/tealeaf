@@ -18,14 +18,14 @@ public class BundleVarDelegateTests {
   Test
   public fun testVariableWritable() {
     class Test(b: Bundle) {
-      var short: Short by bundleVar(b)
-      var int: Int by bundleVar(b)
-      var long: Long by bundleVar(b)
-      var float: Float by bundleVar(b)
-      var string: String by bundleVar(b)
-      var bool: Boolean by bundleVar(b)
-      var byte: Byte by bundleVar(b)
-      var char: Char by bundleVar(b)
+      var short: Short by BundleDelegates.bundleVar(b)
+      var int: Int by BundleDelegates.bundleVar(b)
+      var long: Long by BundleDelegates.bundleVar(b)
+      var float: Float by BundleDelegates.bundleVar(b)
+      var string: String by BundleDelegates.bundleVar(b)
+      var bool: Boolean by BundleDelegates.bundleVar(b)
+      var byte: Byte by BundleDelegates.bundleVar(b)
+      var char: Char by BundleDelegates.bundleVar(b)
     }
 
     val b = Bundle()
@@ -59,19 +59,5 @@ public class BundleVarDelegateTests {
     assertThat(b.getBoolean("bool")).isTrue()
     assertThat(b.getByte("byte")).isEqualTo(1.toByte())
     assertThat(b.getChar("char")).isEqualTo('c')
-  }
-
-  /** Test custom keys can be specified. */
-  Test
-  public fun testAlternateKey() {
-    class Test(b: Bundle) {
-      var default: Int by bundleVar(b, key = { p1 -> "custom key"})
-    }
-
-    val b = Bundle()
-    val v = Test(b)
-    v.default = 5
-    assertThat(b).hasSize(1).hasKey("custom key")
-    assertThat(b.getInt("custom key")).isEqualTo(5)
   }
 }

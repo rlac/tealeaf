@@ -3,39 +3,64 @@ package au.id.rlac.tealeaf.properties
 import kotlin.properties.ReadOnlyProperty
 import kotlin.properties.ReadWriteProperty
 
-private val propertyNameKeyProvider:(PropertyMetadata) -> String = { it.name }
-private val throwIfNoValue:(Any?, Any?) -> Nothing = {(thisRef, key) -> throw NoDefaultValueException()}
+internal val propertyNameKey: (PropertyMetadata) -> String = { it.name }
+internal val throwIfNoValue: (Any?, Any?) -> Nothing = {(thisRef, key) -> throw NoDefaultValueException() }
 
-public class NoDefaultValueException : Exception()
-public class UnsupportedTypeException : Exception()
+/**
+ * Non-caching key-value backed read-only property.
+ */
+internal open class KeyValueVal<TRef, Val, Key, Dict>(val dict: (thisRef: TRef) -> Dict,
+                                                      val key: (PropertyMetadata) -> Key,
+                                                      val default: (TRef, Key) -> Val,
+                                                      val contains: Dict.(Key) -> Boolean,
+                                                      val read: Dict.(Key) -> Val) :
+    ReadOnlyProperty<TRef, Val> {
 
-open class KeyValueVal<T, V, K, D>(val dict: (ref: T) -> D,
-                                   val key: (PropertyMetadata) -> K,
-                                   val default: (ref: T, key: K) -> V,
-                                   val contains: (dict: D, key: K) -> Boolean,
-                                   val read: (D, K) -> Any) :
-    ReadOnlyProperty<T, V> {
-
-  override fun get(thisRef: T, desc: PropertyMetadata): V {
+  override fun get(thisRef: TRef, desc: PropertyMetadata): Val {
     val key = key(desc)
     val dictionary = dict(thisRef)
 
-    [suppress("UNCHECKED_CAST")]
-    return if (contains(dictionary, key)) read(dictionary, key) as V
+    return if (dictionary.contains(key)) dictionary.read(key)
     else default(thisRef, key)
   }
 }
 
-open class KeyValueVar<T, V, K, D>(dict: (ref: T) -> D,
-                                   key: (PropertyMetadata) -> K,
-                                   default: (ref: T, key: K) -> V,
-                                   contains: (dict: D, key: K) -> Boolean,
-                                   read: (D, K) -> Any,
-                                   val write: (D, K, V) -> Unit) :
-    KeyValueVal<T, V, K, D>(dict, key, default, contains, read),
-    ReadWriteProperty<T, V> {
+/**
+ * Non-caching key-value backed read/write property.
+ */
+internal open class KeyValueVar<TRef, Val, Key, Dict>(dict: (ref: TRef) -> Dict,
+                                                      key: (PropertyMetadata) -> Key,
+                                                      default: (TRef, Key) -> Val,
+                                                      contains: Dict.(Key) -> Boolean,
+                                                      read: Dict.(Key) -> Val,
+                                                      val write: Dict.(Key, Val) -> Unit) :
+    KeyValueVal<TRef, Val, Key, Dict>(dict, key, default, contains, read),
+    ReadWriteProperty<TRef, Val> {
 
-  override fun set(thisRef: T, desc: PropertyMetadata, value: V) {
-    write(dict(thisRef), key(desc), value)
+  override fun set(thisRef: TRef, desc: PropertyMetadata, value: Val) {
+    dict(thisRef).write(key(desc), value)
   }
+}
+
+/**
+ * Performs get once only and then returns the cached value.
+ */
+internal open class CachedKeyValueVal<TRef, Val, Key, Dict>(dict: (ref: TRef) -> Dict,
+                                                            key: (PropertyMetadata) -> Key,
+                                                            default: (TRef, Key) -> Val,
+                                                            contains: Dict.(Key) -> Boolean,
+                                                            read: Dict.(Key) -> Val) :
+    KeyValueVal<TRef, Val, Key, Dict>(dict, key, default, contains, read) {
+
+  var cached: Val = null
+
+  override fun get(thisRef: TRef, desc: PropertyMetadata): Val =
+      if (cached != null) cached
+      else synchronized(this) {
+        if (cached == null) {
+          cached = super.get(thisRef, desc)
+        }
+
+        cached
+      }
 }
