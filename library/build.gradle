@@ -1,5 +1,6 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
+apply plugin: 'com.github.dcendents.android-maven'
 
 repositories {
   jcenter()
@@ -35,4 +36,39 @@ dependencies {
 
   androidTestCompile "com.android.support.test:testing-support-lib:0.1"
   androidTestCompile "com.squareup.assertj:assertj-android:1.0.0"
+}
+
+group = project.GROUP
+version = project.VERSION
+
+install {
+  repositories.mavenInstaller {
+    pom {
+      project {
+        packaging 'aar'
+        name project.POM_NAME
+        url project.POM_URL
+        licenses {
+          license {
+            name project.POM_LICENSE_NAME
+            url project.POM_LICENSE_URL
+          }
+        }
+        scm {
+          connection project.POM_SCM_CONNECTION
+          developerConnection project.POM_SCM_DEV_CONNECTION
+          url project.POM_SCM_URL
+        }
+      }
+    }
+  }
+}
+
+task sourcesJar(type: Jar) {
+  from android.sourceSets.main.java.srcDirs
+  classifier = 'sources'
+}
+
+artifacts {
+  archives sourcesJar
 }
