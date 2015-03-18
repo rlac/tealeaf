@@ -6,7 +6,7 @@ Tealeaf is a Kotlin utility library for Android that helps to reduce boilerplate
 
 Tealeaf currently provides:
 
- - Custom property delegates to reduce boilerplate when accessing views, fragment arguments, and shared preferences.
+ - Custom property delegates to reduce boilerplate when accessing views and fragment arguments.
  - Bundle extension methods to save additional standard types to Bundles.
  - Using (similar to try-with-resources) function for a range of types.
  - Misc other utility methods and extensions.
@@ -64,23 +64,6 @@ class MyFragment : Fragment() {
 By default property names are used as the Bundle key, however this can be changed. Default values can also be set.
 
 Bundle delegates can be backed by any arbitrary Bundle, and are not limited to Fragment arguments.
-
-#### Shared Preferences
-
-Similar to Bundle delegates, these back a property with a SharedPreferences entry.
-
-```kotlin
-class MyFragment : Fragment() {
-  // you need to pass a function that can retrieve the SharedPreferences instance you want to use
-  val prefs: (Any) -> SharedPreferences = {(thisRef) -> getActivity().getPreferences(Context.MODE_PRIVATE)
-  // like Bundle delegates, the name of the preference defaults to the property but this can be changed
-  val pref: Int by PreferencesDelegates.intVar(prefs)
-```
-
-You can also pass in functions to the delegate to allow it to persist arbitrary types.
-
-Change notifications are not supported with preference delegates, however you are not prevented from registering a
-shared preferences change listener separately.
 
 ### Using
 
