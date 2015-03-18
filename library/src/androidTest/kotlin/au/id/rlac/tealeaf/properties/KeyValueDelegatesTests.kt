@@ -16,11 +16,11 @@ public class KeyValueDelegatesTests {
     private val contains: HashMap<String, String>.(String) -> Boolean = {(k) -> containsKey(k) }
   }
 
-  /** Test an exception is thrown by throwIfNoValue when the dictionary does not contain the key. */
+  /** Test an exception is thrown by when the dictionary does not contain the key and no default is given. */
   Test
   public fun testThrowWhenNoValue() {
     class Test(map: (Any) -> HashMap<String, String>) {
-      val test by KeyValueVal(map, propertyNameKey, throwIfNoValue, contains, readMap)
+      val test by KeyValueVal(map, propertyNameKey, null, contains, readMap)
     }
 
     val map = HashMap<String, String>()
@@ -38,7 +38,7 @@ public class KeyValueDelegatesTests {
   Test
   public fun testDefaultWhenNoValue() {
     class Test(map: (Any) -> HashMap<String, String>) {
-      val test by KeyValueVal(map, propertyNameKey, {(ref, key): String -> "Default" }, contains, readMap)
+      val test by KeyValueVal(map, propertyNameKey, "Default", contains, readMap)
     }
 
     val map = HashMap<String, String>()
@@ -51,7 +51,7 @@ public class KeyValueDelegatesTests {
   Test
   public fun testNoDefaultWhenValue() {
     class Test(map: (Any) -> HashMap<String, String>) {
-      val test by KeyValueVal(map, propertyNameKey, {(ref, key): String -> "Default" }, contains, readMap)
+      val test by KeyValueVal(map, propertyNameKey, "Default", contains, readMap)
     }
 
     val map = HashMap<String, String>()
@@ -65,7 +65,7 @@ public class KeyValueDelegatesTests {
   Test
   public fun testCustomKey() {
     class Test(map: (Any) -> HashMap<String, String>) {
-      val test by KeyValueVal(map, { "custom property name" }, throwIfNoValue, contains, readMap)
+      val test by KeyValueVal(map, { "custom property name" }, null, contains, readMap)
     }
 
     val map = HashMap<String, String>()
@@ -78,19 +78,21 @@ public class KeyValueDelegatesTests {
   /** Test the Cached implementation caches the value read the first time. */
   Test
   public fun testCachedVal() {
-    class Test(map: HashMap<String, String>, default: (Any, String) -> String) {
-      val test by CachedKeyValueVal({ map }, propertyNameKey, default, contains, readMap)
+    class Test(map: HashMap<String, String>) {
+      var mapReadCount = 0
+      val read: HashMap<String, String>.(String) -> String = {(k) -> mapReadCount++; get(k) }
+
+      val test by CachedKeyValueVal({ map }, propertyNameKey, null, contains, read)
     }
 
     val map = HashMap<String, String>()
-    var defaultAccessCount = 0
-    val default: (Any, String) -> String = {(ref, key) -> defaultAccessCount += 1; "default" }
+    map.put("test", "value")
 
-    val test = Test(map, default)
-    assertThat(defaultAccessCount).isEqualTo(0)
-    assertThat(test.test).isEqualTo("default")
-    assertThat(defaultAccessCount).isEqualTo(1)
-    assertThat(test.test).isEqualTo("default")
-    assertThat(defaultAccessCount).isEqualTo(1)
+    val test = Test(map)
+    assertThat(test.mapReadCount).isEqualTo(0)
+    assertThat(test.test).isEqualTo("value")
+    assertThat(test.mapReadCount).isEqualTo(1)
+    assertThat(test.test).isEqualTo("value")
+    assertThat(test.mapReadCount).isEqualTo(1)
   }
 }

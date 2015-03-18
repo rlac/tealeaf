@@ -14,17 +14,17 @@ import java.io.Serializable
  * Delegates to a value provided by the Fragment arguments.
  *
  * @param key Called to retrieve the Bundle key. By default this is the property name.
- * @param default The default value. By default throws NoDefaultValueException.
+ * @param default The default value. By default this is null and throws NoDefaultValueException.
  */
 public fun Fragment.argument<V>(key: (PropertyMetadata) -> String = propertyNameKey,
-                                default: (Any?, String) -> V = throwIfNoValue): ReadOnlyProperty<Any?, V> =
+                                default: V = null): ReadOnlyProperty<Any?, V> =
     BundleDelegates.bundleVal(bundleFromArguments, key, default)
 
 /**
  * Delegates to the result of a Fragment argument passed to a value mapping function.
  */
 public fun Fragment.argument<BundleV, V>(key: (PropertyMetadata) -> String = propertyNameKey,
-                                         default: (Any?, String) -> V = throwIfNoValue,
+                                         default: V = null,
                                          map: (BundleV) -> V): ReadOnlyProperty<Any?, V> =
     BundleDelegates.mapBundleVal<BundleV, V>(bundleFromArguments, key, default, map)
 
@@ -32,17 +32,17 @@ public fun Fragment.argument<BundleV, V>(key: (PropertyMetadata) -> String = pro
  * Delegates to a value provided by the support library Fragment arguments.
  *
  * @param key Called to retrieve the Bundle key. By default this is the property name.
- * @param default The default value. By default throws NoDefaultValueException.
+ * @param default The default value. By default this is null and throws NoDefaultValueException.
  */
 public fun SupportFragment.argument<V>(key: (PropertyMetadata) -> String = propertyNameKey,
-                                       default: (Any?, String) -> V = throwIfNoValue): ReadOnlyProperty<Any?, V> =
+                                       default: V = null): ReadOnlyProperty<Any?, V> =
     BundleDelegates.bundleVal(bundleFromArguments, key, default)
 
 /**
  * Delegates to the result of a Fragment argument passed to a value mapping function.
  */
 public fun SupportFragment.argument<BundleV, V>(key: (PropertyMetadata) -> String = propertyNameKey,
-                                                default: (Any?, String) -> V = throwIfNoValue,
+                                                default: V = null,
                                                 map: (BundleV) -> V): ReadOnlyProperty<Any?, V> =
     BundleDelegates.mapBundleVal<BundleV, V>(bundleFromArguments, key, default, map)
 
@@ -65,7 +65,7 @@ public object BundleDelegates {
 
   internal fun mapBundleVal<BundleV, V>(bundle: (Any?) -> Bundle,
                                         key: (PropertyMetadata) -> String = propertyNameKey,
-                                        default: (Any?, String) -> V = throwIfNoValue,
+                                        default: V = null,
                                         map: (BundleV) -> V): ReadOnlyProperty<Any?, V> =
       [suppress("UNCHECKED_CAST")]
       CachedKeyValueVal(bundle, key, default, contains, { Bundle.(k) -> map(read(k) as BundleV) })
@@ -73,7 +73,7 @@ public object BundleDelegates {
 
   internal fun bundleVal<V>(bundle: (Any?) -> Bundle,
                             key: (PropertyMetadata) -> String = propertyNameKey,
-                            default: (Any?, String) -> V = throwIfNoValue): ReadOnlyProperty<Any?, V> =
+                            default: V = null): ReadOnlyProperty<Any?, V> =
       [suppress("UNCHECKED_CAST")]
       CachedKeyValueVal(bundle, key, default, contains, read as Bundle.(String) -> V)
 
@@ -86,7 +86,7 @@ public object BundleDelegates {
    */
   public fun bundleVal<V>(bundle: Bundle,
                           key: (PropertyMetadata) -> String = propertyNameKey,
-                          default: (Any?, String) -> V = throwIfNoValue): ReadOnlyProperty<Any?, V> =
+                          default: V = null): ReadOnlyProperty<Any?, V> =
       [suppress("UNCHECKED_CAST")]
       CachedKeyValueVal({ bundle }, key, default, contains, read as Bundle.(String) -> V)
 
@@ -115,7 +115,7 @@ public object BundleDelegates {
    */
   public fun bundleVar<V>(bundle: Bundle,
                           key: (PropertyMetadata) -> String = propertyNameKey,
-                          default: (Any?, String) -> V = throwIfNoValue): ReadWriteProperty<Any?, V> =
+                          default: V = null): ReadWriteProperty<Any?, V> =
       [suppress("UNCHECKED_CAST")]
       KeyValueVar({ bundle }, key, default, contains, read as Bundle.(String) -> V, put)
 

@@ -4,14 +4,13 @@ import kotlin.properties.ReadOnlyProperty
 import kotlin.properties.ReadWriteProperty
 
 internal val propertyNameKey: (PropertyMetadata) -> String = { it.name }
-internal val throwIfNoValue: (Any?, Any?) -> Nothing = {(thisRef, key) -> throw NoDefaultValueException() }
 
 /**
  * Non-caching key-value backed read-only property.
  */
 internal open class KeyValueVal<TRef, Val, Key, Dict>(val dict: (thisRef: TRef) -> Dict,
                                                       val key: (PropertyMetadata) -> Key,
-                                                      val default: (TRef, Key) -> Val,
+                                                      val default: Val,
                                                       val contains: Dict.(Key) -> Boolean,
                                                       val read: Dict.(Key) -> Val) :
     ReadOnlyProperty<TRef, Val> {
@@ -21,7 +20,7 @@ internal open class KeyValueVal<TRef, Val, Key, Dict>(val dict: (thisRef: TRef) 
     val dictionary = dict(thisRef)
 
     return if (dictionary.contains(key)) dictionary.read(key)
-    else default(thisRef, key)
+      else if (default == null) throw NoDefaultValueException() else default
   }
 }
 
@@ -30,7 +29,7 @@ internal open class KeyValueVal<TRef, Val, Key, Dict>(val dict: (thisRef: TRef) 
  */
 internal open class KeyValueVar<TRef, Val, Key, Dict>(dict: (ref: TRef) -> Dict,
                                                       key: (PropertyMetadata) -> Key,
-                                                      default: (TRef, Key) -> Val,
+                                                      default: Val,
                                                       contains: Dict.(Key) -> Boolean,
                                                       read: Dict.(Key) -> Val,
                                                       val write: Dict.(Key, Val) -> Unit) :
@@ -47,7 +46,7 @@ internal open class KeyValueVar<TRef, Val, Key, Dict>(dict: (ref: TRef) -> Dict,
  */
 internal open class CachedKeyValueVal<TRef, Val, Key, Dict>(dict: (ref: TRef) -> Dict,
                                                             key: (PropertyMetadata) -> Key,
-                                                            default: (TRef, Key) -> Val,
+                                                            default: Val,
                                                             contains: Dict.(Key) -> Boolean,
                                                             read: Dict.(Key) -> Val) :
     KeyValueVal<TRef, Val, Key, Dict>(dict, key, default, contains, read) {
