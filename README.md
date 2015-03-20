@@ -8,7 +8,7 @@ Tealeaf currently provides:
 
  - Custom property delegates to reduce boilerplate when accessing views and fragment arguments.
  - Bundle extension methods to save additional standard types to Bundles.
- - Using (similar to try-with-resources) function for a range of types.
+ - Use function for automatically calling recycle on some pooled objects.
  - Misc other utility methods and extensions.
 
 The library is intended to have no dependencies beyond the Kotlin standard library, the Android framework, and the
@@ -55,7 +55,7 @@ class MyFragment : Fragment() {
 Bundle delegates back a property with a value in a Bundle. These can be useful in Fragments to retrieve argument
 values.
 
-```
+```kotlin
 class MyFragment : Fragment() {
   // when accessed, this will read the "arg" int value from the Fragment's arguments Bundle
   val arg: Int by argument()
@@ -67,11 +67,12 @@ Bundle delegates can be backed by any arbitrary Bundle, and are not limited to F
 
 ### Using
 
-Reduce the try { ... } finally { close() } boilerplate needed for disposable resources with the 'using' functions.
+Reduce the try { ... } finally { recycle() } boilerplate needed for recycle classes with the 'use' functions.
 
 ```kotlin
-using (FileInputStream(File("file"))) {
-  /* use the stream (e.g. this.read()) - it will be automatically closed after */
+val ta = obtainTypedArray()
+ta use {
+  /* use the typed array - recycle is called automatically afterwards */
 }
 ```
 
