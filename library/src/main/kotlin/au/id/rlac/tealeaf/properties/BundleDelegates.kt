@@ -47,7 +47,7 @@ public fun SupportFragment.argument<BundleV, V>(key: (PropertyMetadata) -> Strin
     BundleDelegates.mapBundleVal<BundleV, V>(bundleFromArguments, key, default, map)
 
 private val bundleFromArguments: (Any?) -> Bundle =
-    {(thisRef) ->
+    { thisRef ->
       when (thisRef) {
         is Fragment -> thisRef.getArguments()
         is SupportFragment -> thisRef.getArguments()
@@ -68,7 +68,7 @@ public object BundleDelegates {
                                         default: V = null,
                                         map: (BundleV) -> V): ReadOnlyProperty<Any?, V> =
       [suppress("UNCHECKED_CAST")]
-      CachedKeyValueVal(bundle, key, default, contains, { Bundle.(k) -> map(read(k) as BundleV) })
+      CachedKeyValueVal(bundle, key, default, contains, { k -> map(read(k) as BundleV) })
 
 
   internal fun bundleVal<V>(bundle: (Any?) -> Bundle,
@@ -119,9 +119,9 @@ public object BundleDelegates {
       [suppress("UNCHECKED_CAST")]
       KeyValueVar({ bundle }, key, default, contains, read as Bundle.(String) -> V, put)
 
-  private val contains: Bundle.(String) -> Boolean = {(k) -> containsKey(k) }
-  private val read: Bundle.(String) -> Any = {(key) -> get(key) }
-  private val put: Bundle.(String, Any) -> Unit = {(key, value) ->
+  private val contains: Bundle.(String) -> Boolean = { k -> containsKey(k) }
+  private val read: Bundle.(String) -> Any = { k -> get(k) }
+  private val put: Bundle.(String, Any) -> Unit = { key, value ->
     when (value) {
       is String -> putString(key, value)
       is Short -> putShort(key, value)
