@@ -2,6 +2,10 @@
 
 Tealeaf is a Kotlin utility library for Android that helps to reduce boilerplate.
 
+## Discontinued
+
+This project has been discontinued.
+
 ## Features
 
 Tealeaf currently provides:
